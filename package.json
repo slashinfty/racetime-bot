@@ -1,0 +1,31 @@
+{
+  "name": "racetime-bot",
+  "version": "1.0.0",
+  "description": "A Node.js library to help you create chat bots for racetime.gg ",
+  "bin": {
+    "racetime-bot": "index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slashinfty/racetime-bot.git"
+  },
+  "keywords": [
+    "racetime",
+    "bot"
+  ],
+  "author": "Matt Braddock",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/slashinfty/racetime-bot/issues"
+  },
+  "homepage": "https://github.com/slashinfty/racetime-bot#readme",
+  "dependencies": {
+    "formdata-node": "^4.3.3",
+    "randomized-string": "^1.2.6",
+    "rtgg.js": "^2.1.0",
+    "ws": "^8.8.1"
+  }
+}
