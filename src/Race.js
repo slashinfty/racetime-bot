@@ -13,6 +13,7 @@ module.exports = class Race {
     constructor(name, url) {
         this.name = name;
         this.#connection = new WebSocket(url);
+        this.reconnected = false;
 
         /**
          * The self constant allows class functions to be called within this.#connection events listeners
@@ -49,12 +50,13 @@ module.exports = class Race {
              * Continue here
              * You will likely want to do different things based on data.type
              * To send a message to the WebSocket, use self.sendMessage()
+             * Use self.reconnected to determine if this is the first time connecting to a race
              */
         }
     }
 
     /**
-     * Sends messages to the WebSocket
+     * Function to send messages to the WebSocket
      * If sending a message action, this function will automatically generate a random string for the guid property
      */
     sendMessage(action, data = undefined) {
@@ -66,6 +68,15 @@ module.exports = class Race {
             }
             this.#connection.send(JSON.stringify({'action': action, 'data': data}));
         }
+    }
+
+    /**
+     * Function to reconnect to the WebSocket
+     */
+    reconnect(url) {
+        this.#connection.close();
+        this.#connection = new WebSocket(url);
+        this.reconnected = true;
     }
 
     /**

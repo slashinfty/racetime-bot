@@ -48,8 +48,9 @@ module.exports = class Bot {
             body: body
         });
         const data = await response.json();
-        // Set the token and schedule the next token grab
+        // Set the token, reconnect to existing races, and schedule the next token grab
         this.#token = data.access_token;
+        this.races.forEach(race => race.reconnect(`wss://racetime.gg/ws/o/bot/${race.name.split(/(?<=.)\//)[1]}?token=${this.#token}`));
         await this.#tokenTimeout.set(data.expires_in * 500);
         this.#regenerateToken();
     }
@@ -87,7 +88,7 @@ module.exports = class Bot {
 
     /**
      * Create a new race room and connect to it
-     * The object passed as a parameter should have all form data listed here: https://github.com/racetimeGG/racetime-app/wiki/Category-bots#start-and-edit-races
+     * The options object passed as a parameter should have all form data listed here: https://github.com/racetimeGG/racetime-app/wiki/Category-bots#start-and-edit-races
      */
     async createRace(options) {
         // Set up request
@@ -109,5 +110,29 @@ module.exports = class Bot {
         // Connect to the new race
         const raceName = response.headers.get('location');
         this.races.push(new Race(raceName.split(/^\//)[1], `wss://racetime.gg/ws/o/bot/${raceName.split(/(?<=.)\//)[1]}?token=${this.#token}`));
+    }
+
+    /**
+     * Edit the details of a race
+     * The options object passed as a parameter should align to the same form data as detailed in the above createRace function
+     * Certain fields may not be able to be changed (more information: https://github.com/racetimeGG/racetime-app/wiki/Category-bots#edit-a-race)
+     */
+    async editRace(raceName, options) {
+        // Set up request
+        const body = new FormData();
+        for (const key in options) {
+            body.set(key, options[key]);
+        }
+        const response = await fetch(`https://racetime.gg/o/${raceName}/edit`, {
+            method: 'post',
+            headers: {
+                "Authorization": `Bearer ${this.#token}`
+            },
+            body: body
+        });
+        // If there's a problem with the submission
+        if (response.status === 422) {
+            throw 'Unprocessable Entity';
+        }
     }
 }
