@@ -15,11 +15,15 @@ This library provides a basic template for creating these bots.
 
 #### Installation
 
-Via NPM: `npx racetime-bot`
+Initialize a Node.js project (with `npm init`), then, in the directory, run `npx racetime-bot`.
+
+Your `package.json` file will be updated with required dependencies (which will be installed), and a folder named `src` (or `_src` if `src` already exists) will be created, and three files will be added (`index.js`, `Bot.js`, and `Race.js`).
 
 ## Getting Started
 
 You should read the racetime-app documentation on [Category bots](https://github.com/racetimeGG/racetime-app/wiki/Category-bots) to understand what you need to get started. You don't need a thorough understanding of the technical side of things to build your own bot, but it is helpful to be able to understand how messages are structured, and how they are used.
+
+Explore the newly created files, as there are comments to help you customize the bot's behavior.
 
 ## Contributing
 
