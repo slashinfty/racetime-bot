@@ -1,5 +1,6 @@
 const { rtggClient } = require('rtgg.js');
 const { FormData } = require('formdata-node');
+const Timeout = require('await-timeout');
 
 const Race = require('./Race.js');
 
@@ -13,15 +14,15 @@ module.exports = class Bot {
     #id;
     #secret;
     #token;
-    #mainInterval;
+    #mainTimeout;
     #tokenTimeout;
 
     constructor(options) {
         this.#id = options.clientId;
         this.#secret = options.clientSecret;
         this.#token;
-        this.#mainInterval;
-        this.#tokenTimeout;
+        this.#mainTimeout = new Timeout();
+        this.#tokenTimeout = new Timeout();
 
         /**
          * API is access to all public endpoints of racetime.gg (documentation: https://github.com/slashinfty/rtgg.js/blob/main/docs/classes/rtggClient.md)
@@ -49,7 +50,8 @@ module.exports = class Bot {
         const data = await response.json();
         // Set the token and schedule the next token grab
         this.#token = data.access_token;
-        this.#tokenTimeout = setTimeout(this.#regenerateToken, data.expires_in * 500);
+        await this.#tokenTimeout.set(data.expires_in * 500);
+        this.#regenerateToken();
     }
 
     /**
@@ -58,26 +60,29 @@ module.exports = class Bot {
     async #findRaces() {
         // Get all open and ongoing races
         const races = await this.api.races();
+        console.log(new Date(Date.now()));
         // Filter based on category and if an existing connection already exists
         const newRaces = races.filter(race => race.category.slug === this.category && this.races.find(existingRace => existingRace.name === race.name) === undefined);
         // Connect to any new races
-        newRaces.forEach(race => this.races.push(new Race(race.name, `wss://racetime.gg/ws/o/bot/${race.name.split(/\//)[1]}?token=${this.#token}`)));
+        newRaces.forEach(race => this.races.push(new Race(race.name, `wss://racetime.gg/ws/o/bot/${race.name.split(/(?<=.)\//)[1]}?token=${this.#token}`)));
+        await this.#mainTimeout.set(30000);
+        this.#findRaces();
     }
 
     /**
      * Function that generates an access token and looks for new races every 30 seconds
      */
     async initialize() {
-        await this.#regenerateToken();
-        this.#mainInterval = setInterval(this.#findRaces, 30000);
+        this.#regenerateToken();
+        this.#findRaces();
     }
 
     /**
      * Function to cease bot activity, including closing active WebSocket connections
      */
     async destroy() {
-        clearInterval(this.#mainInterval);
-        clearTimeout(this.#tokenTimeout);
+        this.#mainTimeout.clear();
+        this.#tokenTimeout.clear();
         this.races.forEach(race => race.close());
     }
 
@@ -98,12 +103,12 @@ module.exports = class Bot {
             },
             body: body
         });
-        const data = await response.json();
         // If there's a problem with the submission
         if (response.status === 422) {
-            // data?
-            // console.log(errors);
             throw 'Unprocessable Entity';
         }
+        // Connect to the new race
+        const raceName = response.headers.get('location');
+        this.races.push(new Race(raceName.split(/^\//)[1], `wss://racetime.gg/ws/o/bot/${raceName.split(/(?<=.)\//)[1]}?token=${this.#token}`));
     }
 }

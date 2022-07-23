@@ -23,9 +23,10 @@
   },
   "homepage": "https://github.com/slashinfty/racetime-bot#readme",
   "dependencies": {
+    "await-timeout": "^1.1.1",
     "formdata-node": "^4.3.3",
     "randomized-string": "^1.2.6",
-    "rtgg.js": "^2.1.0",
+    "rtgg.js": "^2.1.1",
     "ws": "^8.8.1"
   }
 }
