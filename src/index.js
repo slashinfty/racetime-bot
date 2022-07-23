@@ -11,4 +11,7 @@ const botInstance = new Bot({
     category: ''
 });
 
+/**
+ * Start the bot
+ */
 botInstance.initialize();

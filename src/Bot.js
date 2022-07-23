@@ -60,7 +60,6 @@ module.exports = class Bot {
     async #findRaces() {
         // Get all open and ongoing races
         const races = await this.api.races();
-        console.log(new Date(Date.now()));
         // Filter based on category and if an existing connection already exists
         const newRaces = races.filter(race => race.category.slug === this.category && this.races.find(existingRace => existingRace.name === race.name) === undefined);
         // Connect to any new races
@@ -72,7 +71,7 @@ module.exports = class Bot {
     /**
      * Function that generates an access token and looks for new races every 30 seconds
      */
-    async initialize() {
+    initialize() {
         this.#regenerateToken();
         this.#findRaces();
     }

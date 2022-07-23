@@ -2,8 +2,9 @@
   "name": "racetime-bot",
   "version": "1.0.0",
   "description": "A Node.js library to help you create chat bots for racetime.gg ",
-  "bin": {
-    "racetime-bot": "index.js"
+  "bin": "bin/index.js",
+  "engines": {
+    "node": ">=17.5"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
